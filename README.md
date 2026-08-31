@@ -1,11 +1,3 @@
-WeatherApp
-CIS 436 - Mobile Application Development
-University of Michigan - Dearborn
-Professor: John P. Baugh
-
-Team Member:
-- Hamou
-
 ========================================
 PROJECT DESCRIPTION
 ========================================

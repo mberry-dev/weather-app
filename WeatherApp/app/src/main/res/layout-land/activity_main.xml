@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E3F2FD">
+
+    <!-- Search on the left -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/topFragment"
+        android:name="com.example.weatherapp.TopFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:layout="@layout/fragment_top" />
+
+    <!-- Weather info on the right -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/bottomFragment"
+        android:name="com.example.weatherapp.BottomFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:layout="@layout/fragment_bottom" />
+
+</LinearLayout>

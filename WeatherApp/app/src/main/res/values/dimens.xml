@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="temp_text_size">64sp</dimen>
+    <dimen name="city_text_size">26sp</dimen>
+    <dimen name="desc_text_size">20sp</dimen>
+    <dimen name="detail_text_size">14sp</dimen>
+</resources>

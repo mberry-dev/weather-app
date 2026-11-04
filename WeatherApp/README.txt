@@ -58,7 +58,8 @@ WeatherApp/
 │       └── gradle-wrapper.properties
 ├── build.gradle.kts                 <- Root gradle
 ├── app/build.gradle.kts             <- App gradle
-├── gradle.properties                <- API key stored here (never hardcoded)
+├── gradle.properties                <- Gradle settings (the API key is NOT stored here)
+├── local.properties                 <- Your API key goes here (created locally, never committed)
 ├── gradlew
 └── gradlew.bat
 
@@ -67,12 +68,14 @@ BUILD INSTRUCTIONS
 ========================================
 1. Open Android Studio
 2. Click File -> Open and navigate to the WeatherApp folder
-3. Wait for Gradle sync to complete
-4. Select a device or emulator (API 24+)
-5. Click the green Run button
+3. Wait for Gradle sync to complete (the first sync downloads Gradle and Java)
+4. Add your OpenWeatherMap key to WeatherApp/local.properties (see API KEY below)
+   and sync again
+5. Select a device or emulator (API 24+)
+6. Click the green Run button
 
 Build requirements:
-- Android Studio Hedgehog or newer
+- A current, stable Android Studio (the project needs a recent one for AGP 9.0.0)
 - AGP 9.0.0
 - Gradle 9.1.0
 - Minimum SDK: API 24
@@ -81,11 +84,17 @@ Build requirements:
 ========================================
 API KEY
 ========================================
-The OpenWeatherMap API key is stored in gradle.properties as:
-WEATHER_API_KEY=<key>
+The OpenWeatherMap API key is NOT stored in the repository. Get a free key
+at openweathermap.org, then add this line to WeatherApp/local.properties
+(Android Studio creates that file and Git ignores it):
 
-It is accessed in the app via BuildConfig.WEATHER_API_KEY.
-The API key is never hardcoded in source files.
+WEATHER_API_KEY=your_key_here
+
+The build also accepts the key as a Gradle property (for example in
+~/.gradle/gradle.properties) or as a WEATHER_API_KEY environment variable.
+It is accessed in the app via BuildConfig.WEATHER_API_KEY and is never
+hardcoded in source files. Without a key the app opens, but searches show
+"Invalid API key".
 
 ========================================
 NOTES

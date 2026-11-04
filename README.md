@@ -1,8 +1,13 @@
 # Weather App
 
+[![Web version](https://github.com/mberry-dev/weather-app/actions/workflows/web.yml/badge.svg)](https://github.com/mberry-dev/weather-app/actions/workflows/web.yml)
+[![Android build](https://github.com/mberry-dev/weather-app/actions/workflows/android.yml/badge.svg)](https://github.com/mberry-dev/weather-app/actions/workflows/android.yml)
+
 Search any city for its current weather: temperature, conditions, humidity, wind, pressure, visibility and the day's high and low, in Fahrenheit or Celsius. Built twice: as an **Android app** (Kotlin) and as a **web version** (JavaScript) you can use right in the browser.
 
 **Try it:** https://mberry-dev.github.io/weather-app/
+
+<img src="docs/web-screenshot.png" alt="The web version showing Detroit: 47°F, overcast, with humidity, wind, feels-like, pressure and visibility tiles" width="320">
 
 Built for CIS 436 (Mobile Application Development) at the University of Michigan-Dearborn, then extended with a web version.
 
@@ -10,9 +15,9 @@ Built for CIS 436 (Mobile Application Development) at the University of Michigan
 | --- | --- | --- |
 | Weather data | [OpenWeatherMap](https://openweathermap.org/api) (needs a free API key) | [Open-Meteo](https://open-meteo.com) (no key needed) |
 | Language | Kotlin | JavaScript, no framework or build step |
-| Tests | Written test plan, 3 Pixel emulator profiles | 60 automated tests, plus a live check of the weather service |
+| Tests | Written test plan on 3 Pixel emulator profiles, and a build check on every change | 60 automated tests, plus a live check of the weather service |
 
-The web version uses a different weather service on purpose. A web page's code is public, so an API key placed in it would be visible to everyone. Open-Meteo needs no key, so there is no secret to leak.
+The web version is styled to look like the Android app: the same blue header, orange buttons, and detail tiles. It uses a different weather service on purpose. A web page's code is public, so an API key placed in it would be visible to everyone. Open-Meteo needs no key, so there is no secret to leak.
 
 ## Web version
 
@@ -23,7 +28,7 @@ The web version uses a different weather service on purpose. A web page's code i
 - Remembers your unit and last city in the browser
 - Clear messages for an empty search, a city that isn't found, being offline, and unreadable data
 - A loading spinner, and a newer search always wins over an older, slower one
-- Works on phones and desktops, in light and dark mode, and with a keyboard and screen readers
+- Works on phones and desktops, and with a keyboard and screen readers (it has no accessibility violations in an automated check)
 
 ### Run it locally
 
@@ -35,7 +40,7 @@ npm install
 npm start
 ```
 
-Then open the address it prints in your browser (usually `http://localhost:3000`). It only works while the command above is running on your own computer.
+Then open the address it prints in your browser (usually `http://localhost:3000`). It only works while the command above is running on your own computer. The page loads weather from Open-Meteo, so you need an internet connection.
 
 ### Tests
 
@@ -97,9 +102,19 @@ You need a current, stable version of [Android Studio](https://developer.android
 
 Without a key the app still opens, but every search shows "Invalid API key", and Gradle prints a warning when it syncs.
 
+**If searches say "Invalid API key":** a brand-new key can take from a few minutes to a couple of hours to start working, so wait and search again. If it still fails, check that the line in `local.properties` is exactly `WEATHER_API_KEY=your_key` with no quotes or spaces, then sync Gradle again.
+
+### Known limitations
+
+- Android temperatures are cut off rather than rounded, so a reading of 47.6°F shows as 47°F on Android and 48°F on the web version.
+- On some phones the header runs up under the status bar, so the clock and icons overlap the "Weather App" title.
+- The web version has an "Other matches" list for same-name cities and a saved last city; the Android app doesn't.
+
 ### Testing
 
-I tested the app on three Pixel emulator profiles (Pixel 2, Pixel 4 and Pixel 7) with a written test plan: [`WeatherApp/WeatherApp_TestPlan.xlsx`](WeatherApp/WeatherApp_TestPlan.xlsx). It has 32 test cases over three days (startup and UI, the API and weather data, and rotation), and each one was run on all three devices.
+Every change that touches the Android code is also built on GitHub (the **Android build** badge above). That check confirms the project builds with no key, with a key in `local.properties`, and with a key in an environment variable, and that no key is committed to the repo.
+
+I also tested the app on three Pixel emulator profiles (Pixel 2, Pixel 4 and Pixel 7) with a written test plan: [`WeatherApp/WeatherApp_TestPlan.xlsx`](WeatherApp/WeatherApp_TestPlan.xlsx). It has 32 test cases over three days (startup and UI, the API and weather data, and rotation), and each one was run on all three devices.
 
 The project description with screenshots is in [`WeatherApp/WeatherApp_Description.docx`](WeatherApp/WeatherApp_Description.docx).
 
@@ -116,6 +131,7 @@ weather-app/
 │   │   └── main.js                # Starts the page
 │   ├── tests/                     # Unit and interface tests, with sample responses
 │   └── scripts/check-api.js       # Live check of the weather service
+├── docs/web-screenshot.png        # Screenshot used in this README
 ├── WeatherApp/                    # Android version
 │   ├── WeatherApp_TestPlan.xlsx
 │   ├── WeatherApp_Description.docx
@@ -127,5 +143,7 @@ weather-app/
 │       │   ├── WeatherViewModel.kt    # State kept across rotation
 │       │   └── WeatherData.kt         # The weather data model
 │       └── res/                       # Layouts (portrait and landscape), strings, colors
-└── .github/workflows/web.yml      # Runs the tests and live check, publishes the site
+└── .github/workflows/
+    ├── web.yml                    # Runs the tests and live check, publishes the site
+    └── android.yml                # Builds the Android app and checks the key setup
 ```

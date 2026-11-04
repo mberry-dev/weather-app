@@ -104,11 +104,9 @@ Without a key the app still opens, but every search shows "Invalid API key", and
 
 **If searches say "Invalid API key":** a brand-new key can take from a few minutes to a couple of hours to start working, so wait and search again. If it still fails, check that the line in `local.properties` is exactly `WEATHER_API_KEY=your_key` with no quotes or spaces, then sync Gradle again.
 
-### Known limitations
+### Differences from the web version
 
-- Android temperatures are cut off rather than rounded, so a reading of 47.6°F shows as 47°F on Android and 48°F on the web version.
-- On some phones the header runs up under the status bar, so the clock and icons overlap the "Weather App" title.
-- The web version has an "Other matches" list for same-name cities and a saved last city; the Android app doesn't.
+The web version has an "Other matches" list for same-name cities and remembers your last city between visits. The Android app does neither.
 
 ### Testing
 

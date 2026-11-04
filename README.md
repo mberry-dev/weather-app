@@ -15,9 +15,9 @@ Built for CIS 436 (Mobile Application Development) at the University of Michigan
 | --- | --- | --- |
 | Weather data | [OpenWeatherMap](https://openweathermap.org/api) (needs a free API key) | [Open-Meteo](https://open-meteo.com) (no key needed) |
 | Language | Kotlin | JavaScript, no framework or build step |
-| Tests | Written test plan on 3 Pixel emulator profiles, and a build check on every change | 60 automated tests, plus a live check of the weather service |
+| Tests | Written test plan on 3 Pixel emulator profiles, unit tests for the number formatting, and a build check on every change | 60 automated tests, plus a live check of the weather service |
 
-The web version is styled to look like the Android app: the same blue header, orange buttons, and detail tiles. It uses a different weather service on purpose. A web page's code is public, so an API key placed in it would be visible to everyone. Open-Meteo needs no key, so there is no secret to leak.
+The two versions are built to behave the same: the same layout and colors, the same units and rounding, the same messages, same-name city matches, and a remembered last city and unit. The only differences come from the two weather services: the wording of the conditions ("Scattered clouds" or "Overcast") and the weather icons. The web version uses a different service on purpose. A web page's code is public, so an API key placed in it would be visible to everyone. Open-Meteo needs no key, so there is no secret to leak.
 
 ## Web version
 
@@ -72,16 +72,19 @@ Weather data by [Open-Meteo.com](https://open-meteo.com/) under [CC BY 4.0](http
 
 - Search by city name, with the keyboard's search key or the button
 - Shows temperature, feels-like, a weather icon and description, humidity, wind speed, pressure, visibility, and the day's high and low
-- Toggle between Fahrenheit and Celsius
-- Clear messages for an empty search, a city that isn't found, and network problems
-- A loading spinner while the data is fetched
+- Toggle between Fahrenheit and Celsius. Fahrenheit shows wind in mph and visibility in miles; Celsius shows km/h and km. Numbers are rounded, not cut off.
+- **Same-name cities:** if a search matches several places (Detroit, Michigan and Detroit, Oregon), the best match is shown and the others are one tap away
+- Remembers your unit and last city between launches
+- Clear messages for an empty search, a city that isn't found, an invalid key, and network problems
+- A loading spinner, and a newer search always wins over an older, slower one
 - Survives screen rotation: the weather, the unit and the last city stay put without asking the API again
 
 ### How it's built
 
-- Two fragments in one activity: `TopFragment` (search bar, unit toggle and the API request) and `BottomFragment` (the weather display)
-- `WeatherViewModel` with LiveData keeps the state across rotation, so the two fragments share data and nothing is refetched
-- [Volley](https://developer.android.com/training/volley) for the HTTP request, and [Glide](https://github.com/bumptech/glide) for the weather icons
+- Two fragments in one activity: `TopFragment` (search bar and unit toggle) and `BottomFragment` (the weather display)
+- `WeatherViewModel` with LiveData does the searching and keeps the state across rotation, so the two fragments share data and nothing is refetched. It saves the unit and last city in `SharedPreferences`.
+- `WeatherFormat` holds the rules for showing numbers (units, rounding, place names) with no Android code in it, so it has unit tests
+- [Volley](https://developer.android.com/training/volley) for the HTTP requests (OpenWeatherMap's geocoding, then current weather), and [Glide](https://github.com/bumptech/glide) for the weather icons
 - The API key is read from a git-ignored file at build time and exposed to the app as `BuildConfig.WEATHER_API_KEY`, so it is never committed
 
 ### Run it
@@ -104,13 +107,16 @@ Without a key the app still opens, but every search shows "Invalid API key", and
 
 **If searches say "Invalid API key":** a brand-new key can take from a few minutes to a couple of hours to start working, so wait and search again. If it still fails, check that the line in `local.properties` is exactly `WEATHER_API_KEY=your_key` with no quotes or spaces, then sync Gradle again.
 
-### Differences from the web version
-
-The web version has an "Other matches" list for same-name cities and remembers your last city between visits. The Android app does neither.
-
 ### Testing
 
 Every change that touches the Android code is also built on GitHub (the **Android build** badge above). That check confirms the project builds with no key, with a key in `local.properties`, and with a key in an environment variable, and that no key is committed to the repo.
+
+The number formatting has unit tests (`WeatherFormatTest`) that use the same values as the web version's tests, so the two apps can't drift apart. Run them with:
+
+```bash
+cd WeatherApp
+./gradlew testDebugUnitTest      # on Windows: gradlew.bat testDebugUnitTest
+```
 
 I also tested the app on three Pixel emulator profiles (Pixel 2, Pixel 4 and Pixel 7) with a written test plan: [`WeatherApp/WeatherApp_TestPlan.xlsx`](WeatherApp/WeatherApp_TestPlan.xlsx). It has 32 test cases over three days (startup and UI, the API and weather data, and rotation), and each one was run on all three devices.
 
@@ -136,10 +142,12 @@ weather-app/
 │   └── app/src/main/
 │       ├── java/com/example/weatherapp/
 │       │   ├── MainActivity.kt        # Hosts the two fragments
-│       │   ├── TopFragment.kt         # Search bar, unit toggle, API request
-│       │   ├── BottomFragment.kt      # Weather display
-│       │   ├── WeatherViewModel.kt    # State kept across rotation
-│       │   └── WeatherData.kt         # The weather data model
+│       │   ├── TopFragment.kt         # Search bar and unit toggle
+│       │   ├── BottomFragment.kt      # Weather display and other matches
+│       │   ├── WeatherViewModel.kt    # Searching, saved city and unit, state kept across rotation
+│       │   ├── WeatherFormat.kt       # Units, rounding, messages, place names
+│       │   └── WeatherData.kt         # The weather and place data models
+│       ├── test/                      # Unit tests for WeatherFormat
 │       └── res/                       # Layouts (portrait and landscape), strings, colors
 └── .github/workflows/
     ├── web.yml                    # Runs the tests and live check, publishes the site

@@ -14,11 +14,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 
-// Top fragment — contains the search bar and fetches weather from OpenWeatherMap API
+// Top fragment — the search bar, unit toggle and error message. The searching itself is done in WeatherViewModel.
 class TopFragment : Fragment() {
 
     private val viewModel: WeatherViewModel by activityViewModels()
@@ -27,8 +24,6 @@ class TopFragment : Fragment() {
     private lateinit var searchButton: Button
     private lateinit var errorText: TextView
     private lateinit var unitToggleButton: Button
-
-    private val API_KEY = BuildConfig.WEATHER_API_KEY
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,7 +54,7 @@ class TopFragment : Fragment() {
             insets
         }
 
-        // Restore last searched city after rotation
+        // Show the last searched city (after rotation, or from the previous launch)
         viewModel.lastCity.observe(viewLifecycleOwner) { city ->
             if (!city.isNullOrEmpty()) cityInput.setText(city)
         }
@@ -86,15 +81,8 @@ class TopFragment : Fragment() {
 
         // Search button click
         searchButton.setOnClickListener {
-            val city = cityInput.text.toString().trim()
-            if (city.isNotEmpty()) {
-                hideKeyboard()
-                errorText.visibility = View.GONE
-                fetchWeather(city)
-            } else {
-                errorText.text = "Please enter a city name"
-                errorText.visibility = View.VISIBLE
-            }
+            hideKeyboard()
+            viewModel.search(cityInput.text.toString())
         }
 
         // Allow pressing Enter on keyboard to search
@@ -104,62 +92,6 @@ class TopFragment : Fragment() {
                 true
             } else false
         }
-    }
-
-    private fun fetchWeather(city: String) {
-        viewModel.setLoading(true)
-        viewModel.setLastCity(city)
-
-        val url = "https://api.openweathermap.org/data/2.5/weather" +
-                "?q=$city&appid=$API_KEY&units=metric"
-
-        val queue = Volley.newRequestQueue(requireContext())
-
-        val request = JsonObjectRequest(
-            Request.Method.GET, url, null,
-            { response ->
-                viewModel.setLoading(false)
-                try {
-                    val main    = response.getJSONObject("main")
-                    val wind    = response.getJSONObject("wind")
-                    val weather = response.getJSONArray("weather").getJSONObject(0)
-                    val sys     = response.getJSONObject("sys")
-
-                    val data = WeatherData(
-                        cityName     = response.getString("name"),
-                        country      = sys.getString("country"),
-                        temperature  = main.getDouble("temp"),
-                        feelsLike    = main.getDouble("feels_like"),
-                        humidity     = main.getInt("humidity"),
-                        windSpeed    = wind.getDouble("speed"),
-                        description  = weather.getString("description")
-                            .replaceFirstChar { it.uppercase() },
-                        iconCode     = weather.getString("icon"),
-                        high         = main.getDouble("temp_max"),
-                        low          = main.getDouble("temp_min"),
-                        pressure     = main.getInt("pressure"),
-                        visibility   = response.optInt("visibility", 0)
-                    )
-
-                    viewModel.setWeatherData(data)
-                    viewModel.setError(null)
-
-                } catch (e: Exception) {
-                    viewModel.setError("Error reading weather data")
-                }
-            },
-            { error ->
-                viewModel.setLoading(false)
-                val msg = when (error.networkResponse?.statusCode) {
-                    404  -> "City not found. Please check the spelling."
-                    401  -> "Invalid API key."
-                    else -> "Network error. Please check your connection."
-                }
-                viewModel.setError(msg)
-            }
-        )
-
-        queue.add(request)
     }
 
     private fun hideKeyboard() {

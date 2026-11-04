@@ -197,6 +197,28 @@
 
         </GridLayout>
 
+        <!-- Other places with the same name (shown only when the search found more than one) -->
+        <TextView
+            android:id="@+id/othersTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Other matches"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="#444444"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="6dp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/othersList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 </ScrollView>

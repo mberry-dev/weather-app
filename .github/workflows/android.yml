@@ -45,6 +45,9 @@ jobs:
           ./gradlew assembleDebug --no-daemon
           grep -q 'WEATHER_API_KEY = "key-from-local-file"' app/build/generated/source/buildConfig/debug/com/example/weatherapp/BuildConfig.java
 
+      - name: Unit tests (number formatting must match the web version)
+        run: ./gradlew testDebugUnitTest --no-daemon
+
       - name: The committed code must not contain a real key
         run: |
           if grep -rEn "WEATHER_API_KEY=[0-9a-f]{32}" --include=*.properties --include=*.kts --include=*.kt . ; then

@@ -1,5 +1,23 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
+}
+
+// The OpenWeatherMap API key is never committed. It is looked up, in order, in:
+//   1. WeatherApp/local.properties (git-ignored):  WEATHER_API_KEY=your_key
+//   2. A Gradle property, for example in ~/.gradle/gradle.properties
+//   3. The WEATHER_API_KEY environment variable
+val localProperties = Properties().apply {
+    providers.fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+        .asText.orNull?.let { load(it.reader()) }
+}
+val weatherApiKey: String = localProperties.getProperty("WEATHER_API_KEY")
+    ?: providers.gradleProperty("WEATHER_API_KEY").orNull
+    ?: providers.environmentVariable("WEATHER_API_KEY").orNull
+    ?: ""
+if (weatherApiKey.isBlank()) {
+    logger.warn("WEATHER_API_KEY is not set. Add WEATHER_API_KEY=your_key to local.properties. Weather searches will fail with 'Invalid API key' until you do.")
 }
 
 android {
@@ -14,8 +32,8 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // API key from gradle.properties — never hardcode API keys
-        buildConfigField("String", "WEATHER_API_KEY", "\"${project.findProperty("WEATHER_API_KEY")}\"")
+        // Exposed to the app as BuildConfig.WEATHER_API_KEY (see the lookup at the top of this file)
+        buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
     }
 
     buildTypes {

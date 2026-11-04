@@ -66,7 +66,7 @@ describe('first render', () => {
   test('shows the placeholder, the °F button and an empty, labelled search box', () => {
     const net = standardNetwork();
     start({ fetch: net.fetch });
-    assert.equal(text('.placeholder'), 'Search for a city to see its weather.');
+    assert.equal(text('.placeholder'), 'Search for a city to see weather');
     assert.equal(q('.placeholder').hidden, false);
     assert.equal(q('.weather').hidden, true);
     assert.equal(q('.spinner').hidden, true);
@@ -89,7 +89,7 @@ describe('searching', () => {
     assert.equal(text('.temperature'), '47°F');
     assert.equal(text('.highlow'), 'H: 53°F  L: 38°F');
     assert.deepEqual(detailValues(), {
-      'Feels like': '41°F', Humidity: '71%', Wind: '10 mph', Pressure: '1019 hPa', Visibility: '15 mi',
+      '🌡 Feels Like': '41°F', '💧 Humidity': '71%', '💨 Wind Speed': '10 mph', '📊 Pressure': '1019 hPa', '👁 Visibility': '15 mi',
     });
     assert.equal(q('.spinner').hidden, true);
     assert.equal(text('.error'), '');
@@ -197,7 +197,7 @@ describe('unit toggle', () => {
     assert.equal(text('.temperature'), '8°C');
     assert.equal(text('.highlow'), 'H: 12°C  L: 3°C');
     assert.deepEqual(detailValues(), {
-      'Feels like': '5°C', Humidity: '71%', Wind: '17 km/h', Pressure: '1019 hPa', Visibility: '24.1 km',
+      '🌡 Feels Like': '5°C', '💧 Humidity': '71%', '💨 Wind Speed': '17 km/h', '📊 Pressure': '1019 hPa', '👁 Visibility': '24.1 km',
     });
     q('.unit-button').click();
     assert.equal(text('.temperature'), '47°F');

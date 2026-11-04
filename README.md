@@ -1,10 +1,69 @@
-# Weather App (Android)
+# Weather App
 
-An Android app that shows the current weather for any city in the world. Search by city name and see the temperature, conditions, humidity, wind and more, in Fahrenheit or Celsius.
+Search any city for its current weather: temperature, conditions, humidity, wind, pressure, visibility and the day's high and low, in Fahrenheit or Celsius. Built twice: as an **Android app** (Kotlin) and as a **web version** (JavaScript) you can use right in the browser.
 
-Built in Kotlin for CIS 436 (Mobile Application Development) at the University of Michigan-Dearborn. Weather data comes from the [OpenWeatherMap](https://openweathermap.org/api) API.
+**Try it:** https://mberry-dev.github.io/weather-app/
 
-## Features
+Built for CIS 436 (Mobile Application Development) at the University of Michigan-Dearborn, then extended with a web version.
+
+| | Android app | Web version |
+| --- | --- | --- |
+| Weather data | [OpenWeatherMap](https://openweathermap.org/api) (needs a free API key) | [Open-Meteo](https://open-meteo.com) (no key needed) |
+| Language | Kotlin | JavaScript, no framework or build step |
+| Tests | Written test plan, 3 Pixel emulator profiles | 60 automated tests, plus a live check of the weather service |
+
+The web version uses a different weather service on purpose. A web page's code is public, so an API key placed in it would be visible to everyone. Open-Meteo needs no key, so there is no secret to leak.
+
+## Web version
+
+- Search by city name, with the Enter key or the button
+- Shows the place with its region and country, a weather icon and description, temperature, feels-like, today's high and low, humidity, wind, pressure and visibility
+- **°F / °C toggle** that converts on the page without asking the weather service again. Fahrenheit shows wind in mph and visibility in miles; Celsius shows km/h and km.
+- **Same-name cities:** if a search matches several places (Detroit, Michigan and Detroit, Oregon), the best match is shown and the others are one click away
+- Remembers your unit and last city in the browser
+- Clear messages for an empty search, a city that isn't found, being offline, and unreadable data
+- A loading spinner, and a newer search always wins over an older, slower one
+- Works on phones and desktops, in light and dark mode, and with a keyboard and screen readers
+
+### Run it locally
+
+You need [Node.js](https://nodejs.org) 20 or newer. The page uses JavaScript modules, which browsers won't load from a file opened directly, so serve the folder:
+
+```bash
+cd web
+npm install
+npm start
+```
+
+Then open the address it prints in your browser (usually `http://localhost:3000`). It only works while the command above is running on your own computer.
+
+### Tests
+
+60 automated tests with Node's built-in test runner:
+
+- **Weather logic** (24): temperature, wind and visibility conversions, every weather code, the request URLs, and reading the weather service's responses, including missing or malformed data
+- **Weather service client** (12): successful lookups, no results, being offline, server errors, invalid responses, cancelled requests, and special characters in city names
+- **Interface** (24): the page is loaded in a simulated browser to check searching, errors, the unit toggle, other matches, saving to the browser, out-of-order responses, and that place names from the service can't inject markup
+
+```bash
+cd web
+npm install
+npm test
+```
+
+A separate **live check** calls the real Open-Meteo services and confirms they still answer the way the page expects, including that they allow requests from a web page. It runs on every change and weekly on GitHub, and doesn't block a deploy because the service is outside my control:
+
+```bash
+npm run check:api
+```
+
+### Credits
+
+Weather data by [Open-Meteo.com](https://open-meteo.com/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Location search is based on [GeoNames](https://www.geonames.org/). Open-Meteo's free service is for non-commercial use.
+
+## Android version
+
+### Features
 
 - Search by city name, with the keyboard's search key or the button
 - Shows temperature, feels-like, a weather icon and description, humidity, wind speed, pressure, visibility, and the day's high and low
@@ -13,14 +72,14 @@ Built in Kotlin for CIS 436 (Mobile Application Development) at the University o
 - A loading spinner while the data is fetched
 - Survives screen rotation: the weather, the unit and the last city stay put without asking the API again
 
-## How it's built
+### How it's built
 
 - Two fragments in one activity: `TopFragment` (search bar, unit toggle and the API request) and `BottomFragment` (the weather display)
 - `WeatherViewModel` with LiveData keeps the state across rotation, so the two fragments share data and nothing is refetched
 - [Volley](https://developer.android.com/training/volley) for the HTTP request, and [Glide](https://github.com/bumptech/glide) for the weather icons
 - The API key is read from a git-ignored file at build time and exposed to the app as `BuildConfig.WEATHER_API_KEY`, so it is never committed
 
-## Run it
+### Run it
 
 You need a current, stable version of [Android Studio](https://developer.android.com/studio). The project uses Android Gradle Plugin 9.0 and Gradle 9.1, so an older Android Studio may ask you to update before it will open the project.
 
@@ -38,7 +97,7 @@ You need a current, stable version of [Android Studio](https://developer.android
 
 Without a key the app still opens, but every search shows "Invalid API key", and Gradle prints a warning when it syncs.
 
-## Testing
+### Testing
 
 I tested the app on three Pixel emulator profiles (Pixel 2, Pixel 4 and Pixel 7) with a written test plan: [`WeatherApp/WeatherApp_TestPlan.xlsx`](WeatherApp/WeatherApp_TestPlan.xlsx). It has 32 test cases over three days (startup and UI, the API and weather data, and rotation), and each one was run on all three devices.
 
@@ -48,15 +107,25 @@ The project description with screenshots is in [`WeatherApp/WeatherApp_Descripti
 
 ```
 weather-app/
-└── WeatherApp/
-    ├── WeatherApp_TestPlan.xlsx
-    ├── WeatherApp_Description.docx
-    └── app/src/main/
-        ├── java/com/example/weatherapp/
-        │   ├── MainActivity.kt        # Hosts the two fragments
-        │   ├── TopFragment.kt         # Search bar, unit toggle, API request
-        │   ├── BottomFragment.kt      # Weather display
-        │   ├── WeatherViewModel.kt    # State kept across rotation
-        │   └── WeatherData.kt         # The weather data model
-        └── res/                       # Layouts (portrait and landscape), strings, colors
+├── web/                           # Web version
+│   ├── index.html, style.css
+│   ├── src/
+│   │   ├── weather.js             # Units, weather codes, URLs, reading responses
+│   │   ├── api.js                 # Talks to Open-Meteo
+│   │   ├── ui.js                  # Builds the page and handles input
+│   │   └── main.js                # Starts the page
+│   ├── tests/                     # Unit and interface tests, with sample responses
+│   └── scripts/check-api.js       # Live check of the weather service
+├── WeatherApp/                    # Android version
+│   ├── WeatherApp_TestPlan.xlsx
+│   ├── WeatherApp_Description.docx
+│   └── app/src/main/
+│       ├── java/com/example/weatherapp/
+│       │   ├── MainActivity.kt        # Hosts the two fragments
+│       │   ├── TopFragment.kt         # Search bar, unit toggle, API request
+│       │   ├── BottomFragment.kt      # Weather display
+│       │   ├── WeatherViewModel.kt    # State kept across rotation
+│       │   └── WeatherData.kt         # The weather data model
+│       └── res/                       # Layouts (portrait and landscape), strings, colors
+└── .github/workflows/web.yml      # Runs the tests and live check, publishes the site
 ```

@@ -1,0 +1,52 @@
+name: Android build
+
+# Builds the Android app on GitHub's servers, so the Gradle setup is checked without anyone
+# needing Android Studio. It also proves the API key lookup works from every source.
+on:
+  push:
+    branches: [main]
+    paths: ['WeatherApp/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['WeatherApp/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: WeatherApp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: chmod +x gradlew
+
+      - name: Build with no key (must still build, and warn)
+        run: |
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee build.log
+          grep -q "WEATHER_API_KEY is not set" build.log
+
+      - name: Build with the key in an environment variable
+        env:
+          WEATHER_API_KEY: key-from-environment
+        run: |
+          ./gradlew assembleDebug --no-daemon
+          grep -q 'WEATHER_API_KEY = "key-from-environment"' app/build/generated/source/buildConfig/debug/com/example/weatherapp/BuildConfig.java
+
+      - name: Build with the key in local.properties
+        run: |
+          echo "WEATHER_API_KEY=key-from-local-file" > local.properties
+          ./gradlew assembleDebug --no-daemon
+          grep -q 'WEATHER_API_KEY = "key-from-local-file"' app/build/generated/source/buildConfig/debug/com/example/weatherapp/BuildConfig.java
+
+      - name: The committed code must not contain a real key
+        run: |
+          if grep -rEn "WEATHER_API_KEY=[0-9a-f]{32}" --include=*.properties --include=*.kts --include=*.kt . ; then
+            echo "A real-looking key is committed"; exit 1
+          fi

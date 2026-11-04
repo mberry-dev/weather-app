@@ -9,6 +9,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.android.volley.Request
@@ -44,6 +47,17 @@ class TopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Keep the blue header out from under the status bar and camera cutout
+        // (Android 15+ draws apps edge to edge, so the clock and icons would overlap the title)
+        val basePaddingTop = view.paddingTop
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.updatePadding(top = basePaddingTop + bars.top)
+            insets
+        }
 
         // Restore last searched city after rotation
         viewModel.lastCity.observe(viewLifecycleOwner) { city ->

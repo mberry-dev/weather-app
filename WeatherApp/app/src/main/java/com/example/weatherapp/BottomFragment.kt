@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
+import kotlin.math.roundToInt
 
 // Bottom fragment — displays weather information for the searched city
 class BottomFragment : Fragment() {
@@ -73,13 +74,13 @@ class BottomFragment : Fragment() {
 
     // Convert Celsius to Fahrenheit
     private fun toFahrenheit(celsius: Double): Int {
-        return ((celsius * 9 / 5) + 32).toInt()
+        return ((celsius * 9 / 5) + 32).roundToInt()
     }
 
     // Format temperature with correct unit symbol
     private fun formatTemp(celsius: Double, isFahrenheit: Boolean): String {
         return if (isFahrenheit) "${toFahrenheit(celsius)}°F"
-        else "${celsius.toInt()}°C"
+        else "${celsius.roundToInt()}°C"
     }
 
     private fun showWeather(data: WeatherData, isFahrenheit: Boolean) {

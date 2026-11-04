@@ -1,0 +1,7 @@
+{
+  "results": [
+    { "id": 4990729, "name": "Detroit", "latitude": 42.33143, "longitude": -83.04575, "elevation": 189.0, "feature_code": "PPLA2", "country_code": "US", "admin1_id": 5001836, "admin2_id": 5009578, "admin1": "Michigan", "admin2": "Wayne", "timezone": "America/Detroit", "population": 713777, "country_id": 6252001, "country": "United States" },
+    { "id": 2074812, "name": "Detroit", "latitude": 44.9448, "longitude": -122.1534, "feature_code": "PPL", "country_code": "US", "admin1": "Oregon", "timezone": "America/Los_Angeles", "population": 202, "country_id": 6252001, "country": "United States" }
+  ],
+  "generationtime_ms": 0.9
+}

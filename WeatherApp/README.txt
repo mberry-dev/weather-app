@@ -18,7 +18,11 @@ Features:
 - Search for weather by city name
 - Displays temperature, weather icon, description, humidity, wind speed,
   feels like, pressure, visibility, and daily high/low
-- Toggle between Fahrenheit and Celsius
+- Toggle between Fahrenheit and Celsius (Fahrenheit shows mph and miles,
+  Celsius shows km/h and km; numbers are rounded)
+- Other matches for same-name cities (for example Detroit, Michigan and
+  Detroit, Oregon), one tap to switch
+- Remembers the last city and the unit between launches
 - Weather data retained across orientation changes using ViewModel
 - Error handling for invalid city names or network issues
 - Loading spinner while data is being fetched
@@ -43,10 +47,11 @@ WeatherApp/
 │   └── src/main/
 │       ├── java/com/example/weatherapp/
 │       │   ├── MainActivity.kt      <- Host activity
-│       │   ├── TopFragment.kt       <- Search bar + API calls
-│       │   ├── BottomFragment.kt    <- Weather display
-│       │   ├── WeatherViewModel.kt  <- Jetpack ViewModel
-│       │   └── WeatherData.kt       <- Data class
+│       │   ├── TopFragment.kt       <- Search bar + unit toggle
+│       │   ├── BottomFragment.kt    <- Weather display + other matches
+│       │   ├── WeatherViewModel.kt  <- Searching, saved settings, ViewModel
+│       │   ├── WeatherFormat.kt     <- Units, rounding, messages (unit tested)
+│       │   └── WeatherData.kt       <- Data classes
 │       ├── res/layout/
 │       │   ├── activity_main.xml
 │       │   ├── fragment_top.xml
@@ -100,7 +105,7 @@ hardcoded in source files. Without a key the app opens, but searches show
 NOTES
 ========================================
 - Internet permission is required and declared in AndroidManifest.xml
-- The app uses metric units from the API and converts to Fahrenheit in-app
+- The app uses metric units from the API and converts in-app (see WeatherFormat.kt)
 - Weather icons are loaded from OpenWeatherMap's icon CDN using Glide
 - The ViewModel retains all state (weather data, unit preference, last
   searched city) across orientation changes without re-fetching from API

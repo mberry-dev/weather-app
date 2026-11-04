@@ -17,7 +17,7 @@ Built for CIS 436 (Mobile Application Development) at the University of Michigan
 | Language | Kotlin | JavaScript, no framework or build step |
 | Tests | Written test plan on 3 Pixel emulator profiles, unit tests for the number formatting, and a build check on every change | 60 automated tests, plus a live check of the weather service |
 
-The two versions are built to behave the same: the same layout and colors, the same units and rounding, the same messages, same-name city matches, and a remembered last city and unit. The only differences come from the two weather services: the wording of the conditions ("Scattered clouds" or "Overcast") and the weather icons. The web version uses a different service on purpose. A web page's code is public, so an API key placed in it would be visible to everyone. Open-Meteo needs no key, so there is no secret to leak.
+The two versions are built to behave the same: the same layout and colors, the same units and rounding, the same messages, same-name city matches, and a remembered last city and unit. The only differences come from the two weather services: the wording of the conditions ("Scattered clouds" or "Overcast"), the weather icons, and sometimes the exact high and low. The web version uses a different service on purpose. A web page's code is public, so an API key placed in it would be visible to everyone. Open-Meteo needs no key, so there is no secret to leak.
 
 ## Web version
 
@@ -120,7 +120,7 @@ cd WeatherApp
 
 I also tested the app on three Pixel emulator profiles (Pixel 2, Pixel 4 and Pixel 7) with a written test plan: [`WeatherApp/WeatherApp_TestPlan.xlsx`](WeatherApp/WeatherApp_TestPlan.xlsx). It has 32 test cases over three days (startup and UI, the API and weather data, and rotation), and each one was run on all three devices.
 
-The project description with screenshots is in [`WeatherApp/WeatherApp_Description.docx`](WeatherApp/WeatherApp_Description.docx).
+The project description with screenshots is in [`WeatherApp/WeatherApp_Description.docx`](WeatherApp/WeatherApp_Description.docx). The test plan and description were written for the original course version of the app, before it was updated to match the web version (units, same-name matches and the remembered city).
 
 ## Project structure
 
@@ -139,16 +139,17 @@ weather-app/
 ├── WeatherApp/                    # Android version
 │   ├── WeatherApp_TestPlan.xlsx
 │   ├── WeatherApp_Description.docx
-│   └── app/src/main/
-│       ├── java/com/example/weatherapp/
-│       │   ├── MainActivity.kt        # Hosts the two fragments
-│       │   ├── TopFragment.kt         # Search bar and unit toggle
-│       │   ├── BottomFragment.kt      # Weather display and other matches
-│       │   ├── WeatherViewModel.kt    # Searching, saved city and unit, state kept across rotation
-│       │   ├── WeatherFormat.kt       # Units, rounding, messages, place names
-│       │   └── WeatherData.kt         # The weather and place data models
-│       ├── test/                      # Unit tests for WeatherFormat
-│       └── res/                       # Layouts (portrait and landscape), strings, colors
+│   └── app/src/
+│       ├── main/
+│       │   ├── java/com/example/weatherapp/
+│       │   │   ├── MainActivity.kt        # Hosts the two fragments
+│       │   │   ├── TopFragment.kt         # Search bar and unit toggle
+│       │   │   ├── BottomFragment.kt      # Weather display and other matches
+│       │   │   ├── WeatherViewModel.kt    # Searching, saved city and unit, state kept across rotation
+│       │   │   ├── WeatherFormat.kt       # Units, rounding, messages, place names
+│       │   │   └── WeatherData.kt         # The weather and place data models
+│       │   └── res/                       # Layouts (portrait and landscape), strings, colors
+│       └── test/                          # Unit tests for WeatherFormat
 └── .github/workflows/
     ├── web.yml                    # Runs the tests and live check, publishes the site
     └── android.yml                # Builds the Android app and checks the key setup

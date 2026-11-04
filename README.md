@@ -1,8 +1,5 @@
 # Weather App
 
-[![Web version](https://github.com/mberry-dev/weather-app/actions/workflows/web.yml/badge.svg)](https://github.com/mberry-dev/weather-app/actions/workflows/web.yml)
-[![Android build](https://github.com/mberry-dev/weather-app/actions/workflows/android.yml/badge.svg)](https://github.com/mberry-dev/weather-app/actions/workflows/android.yml)
-
 Search any city for its current weather: temperature, conditions, humidity, wind, pressure, visibility and the day's high and low, in Fahrenheit or Celsius. Built twice: as an **Android app** (Kotlin) and as a **web version** (JavaScript) you can use right in the browser.
 
 **Try it:** https://mberry-dev.github.io/weather-app/
@@ -109,13 +106,13 @@ Without a key the app still opens, but every search shows "Invalid API key", and
 
 ### Testing
 
-Every change that touches the Android code is also built on GitHub (the **Android build** badge above). That check confirms the project builds with no key, with a key in `local.properties`, and with a key in an environment variable, and that no key is committed to the repo.
+Every change that touches the Android code is also built on GitHub. That check confirms the project builds with no key, with a key in `local.properties`, and with a key in an environment variable, and that no key is committed to the repo.
 
 The number formatting has unit tests (`WeatherFormatTest`) that use the same values as the web version's tests, so the two apps can't drift apart. Run them with:
 
 ```bash
 cd WeatherApp
-./gradlew testDebugUnitTest      # on Windows: gradlew.bat testDebugUnitTest
+./gradlew testDebugUnitTest      # Git Bash: as shown. PowerShell: .\gradlew.bat testDebugUnitTest
 ```
 
 I also tested the app on three Pixel emulator profiles (Pixel 2, Pixel 4 and Pixel 7) with a written test plan: [`WeatherApp/WeatherApp_TestPlan.xlsx`](WeatherApp/WeatherApp_TestPlan.xlsx). It has 32 test cases over three days (startup and UI, the API and weather data, and rotation), and each one was run on all three devices.

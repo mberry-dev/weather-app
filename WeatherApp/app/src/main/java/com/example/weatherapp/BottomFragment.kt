@@ -1,16 +1,20 @@
 package com.example.weatherapp
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
-import kotlin.math.roundToInt
+import com.google.android.material.button.MaterialButton
 
 // Bottom fragment — displays weather information for the searched city
 class BottomFragment : Fragment() {
@@ -29,6 +33,8 @@ class BottomFragment : Fragment() {
     private lateinit var pressureText: TextView
     private lateinit var visibilityText: TextView
     private lateinit var placeholderText: TextView
+    private lateinit var othersTitle: TextView
+    private lateinit var othersList: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +55,8 @@ class BottomFragment : Fragment() {
         pressureText    = view.findViewById(R.id.pressureText)
         visibilityText  = view.findViewById(R.id.visibilityText)
         placeholderText = view.findViewById(R.id.placeholderText)
+        othersTitle     = view.findViewById(R.id.othersTitle)
+        othersList      = view.findViewById(R.id.othersList)
 
         return view
     }
@@ -58,53 +66,52 @@ class BottomFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            updatePlaceholder()
         }
 
         // Observe both weather data and unit toggle — update UI when either changes
         viewModel.weatherData.observe(viewLifecycleOwner) { data ->
             if (data != null) showWeather(data, viewModel.isFahrenheit.value ?: true)
             else showPlaceholder()
+            updatePlaceholder()
         }
 
         viewModel.isFahrenheit.observe(viewLifecycleOwner) { isFahrenheit ->
             val data = viewModel.weatherData.value
             if (data != null) showWeather(data, isFahrenheit)
         }
+
+        viewModel.alternatives.observe(viewLifecycleOwner) { alternatives ->
+            showAlternatives(alternatives)
+        }
     }
 
-    // Convert Celsius to Fahrenheit
-    private fun toFahrenheit(celsius: Double): Int {
-        return ((celsius * 9 / 5) + 32).roundToInt()
-    }
-
-    // Format temperature with correct unit symbol
-    private fun formatTemp(celsius: Double, isFahrenheit: Boolean): String {
-        return if (isFahrenheit) "${toFahrenheit(celsius)}°F"
-        else "${celsius.roundToInt()}°C"
+    // The placeholder shows only before the first result, and not while a search is loading
+    private fun updatePlaceholder() {
+        val noWeather = viewModel.weatherData.value == null
+        val loading = viewModel.isLoading.value == true
+        placeholderText.visibility = if (noWeather && !loading) View.VISIBLE else View.GONE
     }
 
     private fun showWeather(data: WeatherData, isFahrenheit: Boolean) {
-        placeholderText.visibility = View.GONE
         weatherIcon.visibility     = View.VISIBLE
         cityNameText.visibility    = View.VISIBLE
 
-        cityNameText.text    = "${data.cityName}, ${data.country}"
-        temperatureText.text = formatTemp(data.temperature, isFahrenheit)
+        cityNameText.text    = data.placeName
+        temperatureText.text = WeatherFormat.temp(data.temperature, isFahrenheit)
         descriptionText.text = data.description
-        feelsLikeText.text   = "Feels like: ${formatTemp(data.feelsLike, isFahrenheit)}"
-        humidityText.text    = "Humidity: ${data.humidity}%"
-        windSpeedText.text   = "Wind: ${data.windSpeed} m/s"
-        highLowText.text     = "H: ${formatTemp(data.high, isFahrenheit)}  " +
-                "L: ${formatTemp(data.low, isFahrenheit)}"
-        pressureText.text    = "Pressure: ${data.pressure} hPa"
-        visibilityText.text  = "Visibility: ${data.visibility / 1000} km"
+        feelsLikeText.text   = WeatherFormat.temp(data.feelsLike, isFahrenheit)
+        humidityText.text    = WeatherFormat.humidity(data.humidity)
+        windSpeedText.text   = WeatherFormat.wind(data.windSpeed, isFahrenheit)
+        highLowText.text     = WeatherFormat.highLow(data.high, data.low, isFahrenheit)
+        pressureText.text    = WeatherFormat.pressure(data.pressure)
+        visibilityText.text  = WeatherFormat.visibility(data.visibility, isFahrenheit)
 
         val iconUrl = "https://openweathermap.org/img/wn/${data.iconCode}@2x.png"
         Glide.with(this).load(iconUrl).into(weatherIcon)
     }
 
     private fun showPlaceholder() {
-        placeholderText.visibility = View.VISIBLE
         weatherIcon.visibility     = View.GONE
         cityNameText.visibility    = View.GONE
         temperatureText.text       = ""
@@ -115,5 +122,32 @@ class BottomFragment : Fragment() {
         highLowText.text           = ""
         pressureText.text          = ""
         visibilityText.text        = ""
+    }
+
+    // "Other matches": one full-width button per same-name place; tapping one shows its weather
+    private fun showAlternatives(alternatives: List<Alternative>) {
+        othersList.removeAllViews()
+        val visibility = if (alternatives.isEmpty()) View.GONE else View.VISIBLE
+        othersTitle.visibility = visibility
+        othersList.visibility = visibility
+
+        val gap = (6 * resources.displayMetrics.density).toInt()
+        for (alternative in alternatives) {
+            val button = MaterialButton(requireContext()).apply {
+                text = alternative.label
+                isAllCaps = false
+                gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                cornerRadius = 0
+                backgroundTintList = ColorStateList.valueOf(Color.parseColor("#BBDEFB"))
+                setTextColor(Color.parseColor("#212121"))
+                setOnClickListener { viewModel.showMatch(alternative.index) }
+            }
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            params.bottomMargin = gap
+            othersList.addView(button, params)
+        }
     }
 }

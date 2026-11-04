@@ -64,6 +64,8 @@ export function mountWeather(root, options = {}) {
   // ── Build the page once ───────────────────────────────────────────────────
 
   const app = el('div', 'app');
+  const top = el('div', 'top');
+  const content = el('div', 'content');
 
   const header = el('header', 'topbar');
   const title = el('h1', 'title', '🌤 Weather App');
@@ -97,27 +99,27 @@ export function mountWeather(root, options = {}) {
   spinnerIcon.setAttribute('aria-hidden', 'true');
   spinner.append(spinnerIcon, el('span', 'visually-hidden', 'Loading weather'));
 
-  const placeholder = el('p', 'placeholder', 'Search for a city to see its weather.');
+  const placeholder = el('p', 'placeholder', 'Search for a city to see weather');
 
   const weatherBox = el('section', 'weather');
   weatherBox.setAttribute('aria-label', 'Current weather');
   weatherBox.setAttribute('aria-live', 'polite');
-  const placeName = el('h2', 'place');
-  const conditions = el('p', 'conditions');
-  const conditionsIcon = el('span', 'conditions-icon');
+  const conditionsIcon = el('p', 'conditions-icon');
   conditionsIcon.setAttribute('aria-hidden', 'true');
-  const conditionsLabel = el('span', 'conditions-label');
-  conditions.append(conditionsIcon, conditionsLabel);
+  const placeName = el('h2', 'place');
   const temperature = el('p', 'temperature');
+  const conditionsLabel = el('p', 'conditions-label');
   const highLow = el('p', 'highlow');
   const details = el('dl', 'details');
   const others = el('div', 'others');
   const othersTitle = el('p', 'others-title', 'Other matches');
   const othersList = el('ul', 'others-list');
   others.append(othersTitle, othersList);
-  weatherBox.append(placeName, conditions, temperature, highLow, details, others);
+  weatherBox.append(conditionsIcon, placeName, temperature, conditionsLabel, highLow, details, others);
 
-  app.append(header, form, errorBox, spinner, placeholder, weatherBox);
+  top.append(header, form, errorBox);
+  content.append(spinner, placeholder, weatherBox);
+  app.append(top, content);
   root.replaceChildren(app);
 
   // ── Draw the current state ────────────────────────────────────────────────
@@ -151,11 +153,11 @@ export function mountWeather(root, options = {}) {
     temperature.textContent = formatTemp(weather.temperature, unit);
     highLow.textContent = `H: ${formatTemp(weather.high, unit)}  L: ${formatTemp(weather.low, unit)}`;
     details.replaceChildren(
-      detail('Feels like', formatTemp(weather.feelsLike, unit)),
-      detail('Humidity', formatHumidity(weather.humidity)),
-      detail('Wind', formatWind(weather.windSpeed, unit)),
-      detail('Pressure', formatPressure(weather.pressure)),
-      detail('Visibility', formatVisibility(weather.visibility, unit)),
+      detail('💧 Humidity', formatHumidity(weather.humidity)),
+      detail('💨 Wind Speed', formatWind(weather.windSpeed, unit)),
+      detail('🌡 Feels Like', formatTemp(weather.feelsLike, unit)),
+      detail('📊 Pressure', formatPressure(weather.pressure)),
+      detail('👁 Visibility', formatVisibility(weather.visibility, unit)),
     );
 
     const alternatives = matches.filter((m) => m.id !== place.id);
